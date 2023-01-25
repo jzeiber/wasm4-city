@@ -24,6 +24,7 @@ enum
 	SaveLoadToolbarButton = LastBuildingBrush + 1,
 	BudgetToolbarButton,
 	DemographicsToolbarButton,
+	MapToolbarButton,
 	PauseGoToolbarButton
 };
 
@@ -36,7 +37,8 @@ enum
 	ShowingToolbar,
 	SaveLoadMenu,
 	BudgetMenu,
-	DemographicsMenu
+	DemographicsMenu,
+	MapMenu
 };
 
 typedef struct

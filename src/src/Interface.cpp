@@ -146,9 +146,21 @@ void HandleInput(uint8_t input)
 				UIState.state = DemographicsMenu;
 				UIState.selection = 0;
 			}
+			else if (UIState.selection == MapToolbarButton)
+			{
+				UIState.state = MapMenu;
+				UIState.selection = 0;
+			}
 			else if (UIState.selection == PauseGoToolbarButton)
 			{
 				State.flags^=FLAG_PAUSE;
+			}
+		}
+		if(input & (INPUT_UP | INPUT_DOWN))
+		{
+			if(UIState.selection == PauseGoToolbarButton)
+			{
+				State.flags^=FLAG_FAST;
 			}
 		}
 	}
@@ -409,6 +421,50 @@ void HandleInput(uint8_t input)
 		if(input & (INPUT_A | INPUT_B))
 		{
 			UIState.state = InGame;
+		}
+	}
+	else if (UIState.state == MapMenu)
+	{
+		if(input & (INPUT_A))
+		{
+			UIState.state = InGame;
+		}
+		else if(input & (INPUT_B))
+		{
+			switch(UIState.selection)
+			{
+			case 0:
+				State.flags^=FLAG_MAP_SHOWBUILDINGS;
+				break;
+			case 1:
+				State.flags^=FLAG_MAP_SHOWROADS;
+				break;
+			case 2:
+				State.flags^=FLAG_MAP_SHOWELECTRIC;
+				break;
+			case 3:
+				State.flags^=FLAG_MAP_SHOWFDRANGE;
+				break;
+			}
+		}
+		else if(input & (INPUT_DOWN | INPUT_RIGHT))
+		{
+			UIState.selection++;
+			if(UIState.selection>3)
+			{
+				UIState.selection=0;
+			}
+		}
+		else if(input & (INPUT_UP | INPUT_LEFT))
+		{
+			if(UIState.selection==0)
+			{
+				UIState.selection=3;
+			}
+			else
+			{
+				UIState.selection--;
+			}
 		}
 	}
 }

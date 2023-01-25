@@ -118,10 +118,10 @@ uint8_t* GetPowerGrid()
 
 void start()
 {
-  PALETTE[0]=0x000000;
-  PALETTE[1]=0xffffff;
-  PALETTE[2]=0x35A54D;
-  PALETTE[3]=0x5183C1;
+  PALETTE[0]=0x000000;      // black
+  PALETTE[1]=0xffffff;      // white
+  PALETTE[2]=0x35A54D;      // green
+  PALETTE[3]=0x5183C1;      // blue
   InitGame();
 }
 

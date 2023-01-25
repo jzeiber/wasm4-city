@@ -48,3 +48,4 @@ bool CanPlaceBuilding(uint8_t buildingType, uint8_t x, uint8_t y);
 const BuildingInfo* GetBuildingInfo(uint8_t buildingType);
 Building* GetBuilding(uint8_t x, uint8_t y);
 void DestroyBuilding(Building* building);
+uint8_t GetManhattanDistance(Building* a, Building* b);

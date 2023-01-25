@@ -67,9 +67,9 @@
 #define POWERCUT_TILE 48
 #define RUBBLE_TILE 51
 
-#define FIRST_BRUSH_TILE 240
+#define FIRST_BRUSH_TILE 238
 
-#define NUM_TOOLBAR_BUTTONS 15
+#define NUM_TOOLBAR_BUTTONS 16
 
 #define MAX_POPULATION_DENSITY 15
 
@@ -94,4 +94,36 @@
 #define MAX_TIME_BETWEEN_DISASTERS (FRAMES_PER_YEAR * 6)
 
 //#define DISASTER_MESSAGE_DISPLAY_TIME 60
-#define DISASTER_MESSAGE_DISPLAY_TIME 360
+#define DISASTER_MESSAGE_DISPLAY_TIME 255
+
+
+// following originally in Simulation.cpp
+
+#define SIM_INCREMENT_POP_THRESHOLD 20				// Score must be more than this to grow
+#define SIM_DECREMENT_POP_THRESHOLD -30				// Score must be less than this to shrink
+
+#define AVERAGE_POPULATION_DENSITY 8
+#define SIM_BASE_SCORE 15							// When population is zero
+#define SIM_AVERAGING_STRENGTH 0
+#define SIM_EMPLOYMENT_BOOST 10
+#define SIM_UNEMPLOYMENT_PENALTY 100
+#define SIM_INDUSTRIAL_OPPORTUNITY_BOOST 10
+#define SIM_COMMERCIAL_OPPORTUNITY_BOOST 10
+#define SIM_LOCAL_BUILDING_DISTANCE 32
+#define SIM_LOCAL_BUILDING_INFLUENCE 4
+#define SIM_STADIUM_BOOST 100
+#define SIM_PARK_BOOST 5
+#define SIM_MAX_CRIME 50
+#define SIM_RANDOM_STRENGTH_MASK 31
+#define SIM_POLLUTION_INFLUENCE 2
+#define SIM_MAX_POLLUTION 50
+#define SIM_INDUSTRIAL_BASE_POLLUTION 8
+#define SIM_TRAFFIC_BASE_POLLUTION 8
+#define SIM_POWERPLANT_BASE_POLLUTION 32
+#define SIM_HEAVY_TRAFFIC_THRESHOLD 12
+#define SIM_IDEAL_TAX_RATE 6
+#define SIM_TAX_RATE_PENALTY 10
+#define SIM_FIRE_SPREAD_CHANCE 64					// If 8 bit rand value is less than this then attempt to spread fire
+#define SIM_FIRE_BURN_CHANCE 64						// If 8 bit rand value is less than this then increase fire counter
+#define SIM_FIRE_DEPT_BASE_INFLUENCE 64				// Higher means less influence
+#define SIM_FIRE_DEPT_INFLUENCE_MULTIPLIER 5		// Higher means less influence (based on distance)

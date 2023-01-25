@@ -14,6 +14,7 @@ const char StadiumStr[] = "Stadium";
 const char SaveLoadStr[] = "Save/Load";
 const char BudgetStr[] = "Budget";
 const char DemographicsStr[] = "Demographics";
+const char MapStr[] = "Map";
 const char PauseStr[] = "Pause/Go";
 
 const char* const ToolbarStrings[] =
@@ -32,6 +33,7 @@ const char* const ToolbarStrings[] =
 	SaveLoadStr,
 	BudgetStr,
 	DemographicsStr,
+	MapStr,
 	PauseStr,
 };
 

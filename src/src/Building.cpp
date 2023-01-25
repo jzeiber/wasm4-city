@@ -208,3 +208,10 @@ void DestroyBuilding(Building* building)
 		}
 	}
 }
+
+uint8_t GetManhattanDistance(Building* a, Building* b)
+{
+	uint8_t x = a->x > b->x ? a->x - b->x : b->x - a->x;
+	uint8_t y = a->y > b->y ? a->y - b->y : b->y - a->y;
+	return x + y;
+}

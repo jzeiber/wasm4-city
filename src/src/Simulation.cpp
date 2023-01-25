@@ -9,6 +9,7 @@ enum SimulationSteps
 	SimulateBuildings = 0,
 	SimulatePower = MAX_BUILDINGS,
 	SimulatePopulation,
+	SimulateFastNextMonth,
 	SimulateNextMonth = 360
 };
 
@@ -17,35 +18,6 @@ void DebugBuildingScore(Building* building, int score, int crime, int pollution,
 #else
 inline void DebugBuildingScore(Building* building, int score, int crime, int pollution, int localInfluence, int populationEffect, int randomEffect) {}
 #endif
-
-#define SIM_INCREMENT_POP_THRESHOLD 20				// Score must be more than this to grow
-#define SIM_DECREMENT_POP_THRESHOLD -30				// Score must be less than this to shrink
-
-#define AVERAGE_POPULATION_DENSITY 8
-#define SIM_BASE_SCORE 15							// When population is zero
-#define SIM_AVERAGING_STRENGTH 0
-#define SIM_EMPLOYMENT_BOOST 10
-#define SIM_UNEMPLOYMENT_PENALTY 100
-#define SIM_INDUSTRIAL_OPPORTUNITY_BOOST 10
-#define SIM_COMMERCIAL_OPPORTUNITY_BOOST 10
-#define SIM_LOCAL_BUILDING_DISTANCE 32
-#define SIM_LOCAL_BUILDING_INFLUENCE 4
-#define SIM_STADIUM_BOOST 100
-#define SIM_PARK_BOOST 5
-#define SIM_MAX_CRIME 50
-#define SIM_RANDOM_STRENGTH_MASK 31
-#define SIM_POLLUTION_INFLUENCE 2
-#define SIM_MAX_POLLUTION 50
-#define SIM_INDUSTRIAL_BASE_POLLUTION 8
-#define SIM_TRAFFIC_BASE_POLLUTION 8
-#define SIM_POWERPLANT_BASE_POLLUTION 32
-#define SIM_HEAVY_TRAFFIC_THRESHOLD 12
-#define SIM_IDEAL_TAX_RATE 6
-#define SIM_TAX_RATE_PENALTY 10
-#define SIM_FIRE_SPREAD_CHANCE 64					// If 8 bit rand value is less than this then attempt to spread fire
-#define SIM_FIRE_BURN_CHANCE 64						// If 8 bit rand value is less than this then increase fire counter
-#define SIM_FIRE_DEPT_BASE_INFLUENCE 64				// Higher means less influence
-#define SIM_FIRE_DEPT_INFLUENCE_MULTIPLIER 5		// Higher means less influence (based on distance)
 
 uint8_t GetNumRoadConnections(Building* building)
 {
@@ -96,13 +68,6 @@ uint8_t GetNumRoadConnections(Building* building)
 	}
 		
 	return count;
-}
-
-uint8_t GetManhattanDistance(Building* a, Building* b)
-{
-	uint8_t x = a->x > b->x ? a->x - b->x : b->x - a->x;
-	uint8_t y = a->y > b->y ? a->y - b->y : b->y - a->y;
-	return x + y;
 }
 
 void DoBudget()
@@ -510,19 +475,21 @@ void Simulate()
 		case SimulatePopulation:
 			CountPopulation();
 			break;
+		case SimulateFastNextMonth:
 		case SimulateNextMonth:
-		{
-			State.simulationStep = 0;
-			State.month++;
-			if (State.month >= 12)
+			if(State.simulationStep==SimulateNextMonth || ((State.flags & FLAG_FAST) == FLAG_FAST && State.simulationStep==SimulateFastNextMonth))
 			{
-				State.month = 0;
-				State.year++;
+				State.simulationStep = 0;
+				State.month++;
+				if (State.month >= 12)
+				{
+					State.month = 0;
+					State.year++;
 
-				DoBudget();
+					DoBudget();
+				}
+				return;
 			}
-		}
-		return;
 		}
 
 		State.simulationStep++;

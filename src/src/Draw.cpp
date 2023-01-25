@@ -607,6 +607,10 @@ void DrawUI()
 			if(n==PauseGoToolbarButton && (State.flags & FLAG_PAUSE) == FLAG_PAUSE)
 			{
 				n++;	// we're currently paused, play icon is next icon
+				if((State.flags & FLAG_FAST) == FLAG_FAST)
+				{
+					n++;	// fast icon is +1 from play icon
+				}
 			}
 			DrawTileAt(FIRST_BRUSH_TILE + n, buttonX, DISPLAY_HEIGHT - TILE_SIZE - 1);
 			buttonX += TILE_SIZE + 1;
@@ -668,6 +672,11 @@ void DrawUI()
 	{
 		DrawFilledRect(0,FONT_HEIGHT+2,FONT_WIDTH*6 + 2, FONT_HEIGHT+2, PALETTE_WHITE);
 		DrawString("Paused",1,FONT_HEIGHT + 3);
+	}
+	if((State.flags & FLAG_PAUSE) != FLAG_PAUSE && (State.flags & FLAG_FAST) == FLAG_FAST && ((AnimationFrame & 16) !=0))
+	{
+		DrawFilledRect(0,FONT_HEIGHT+2,FONT_WIDTH*4 + 2, FONT_HEIGHT+2, PALETTE_WHITE);
+		DrawString("Fast",1,FONT_HEIGHT + 3);
 	}
 
 	// Funds at top right
@@ -747,7 +756,7 @@ const char NewCityStr[] = "New City";
 const char AutoBudgetStr[] = "Auto Budget:";
 const char OnStr[] = "On";
 const char OffStr[] = "Off";
-const char VersionStr[] = "v0.1";
+const char VersionStr[] = "v0.2";
 
 void DrawSaveLoadMenu()
 {
@@ -902,6 +911,221 @@ void DrawDemographicsMenu()
 
 }
 
+void DrawTile(const uint8_t tile, const int32_t x, const int32_t y, const uint8_t fg, const uint8_t bg, const bool transparent)
+{
+	const uint8_t *data=GetTileData(tile);
+	int32_t byte=0;
+	int32_t bit=0;
+	for(int32_t xx=0; xx<TILE_SIZE; xx++)
+	{
+		for(int32_t yy=0; yy<TILE_SIZE; yy++)
+		{
+			if((data[byte] & (1 << bit))==0)
+			{
+				PutPixel(x+xx,y+yy,fg);
+			}
+			else if(transparent==false)
+			{
+				PutPixel(x+xx,y+yy,bg);
+			}
+			bit++;
+			if(bit==8)
+			{
+				byte++;
+				bit=0;
+			}
+		}
+	}
+}
+
+void DrawMapMenu()
+{
+	bool showbuildings=(State.flags & FLAG_MAP_SHOWBUILDINGS)==FLAG_MAP_SHOWBUILDINGS;
+	bool showroads=(State.flags & FLAG_MAP_SHOWROADS)==FLAG_MAP_SHOWROADS;
+	bool showpower=(State.flags & FLAG_MAP_SHOWELECTRIC)==FLAG_MAP_SHOWELECTRIC;
+	bool showfdrange=(State.flags & FLAG_MAP_SHOWFDRANGE)==FLAG_MAP_SHOWFDRANGE;
+
+	const int32_t offsetx=(SCREEN_SIZE-(3*MAP_WIDTH))/2;
+
+	*DRAW_COLORS=(PALETTE_WHITE << 4) | PALETTE_WHITE;
+	rect(0,0,SCREEN_SIZE,SCREEN_SIZE);
+
+	/*
+	for(int i=0; i<MAX_BUILDINGS; i++)
+	{
+		if(State.buildings[i].type)
+		{
+			State.buildings[i].type
+		}
+	}
+	*/
+	for(int y=0; y<MAP_HEIGHT; y++)
+	{
+		for(int x=0; x<MAP_WIDTH; x++)
+		{
+			if(IsTerrainClear(x,y)==true)
+			{
+				*DRAW_COLORS=(PALETTE_GREEN << 4) | PALETTE_GREEN;
+			}
+			else
+			{
+				*DRAW_COLORS=(PALETTE_BLUE << 4) | PALETTE_BLUE;
+			}
+			rect(offsetx+(x*3),y*3,3,3);
+
+			if(showroads==true)
+			{
+				uint8_t connections=GetConnections(x,y);
+				if((connections & RoadMask) == RoadMask)
+				{
+					*DRAW_COLORS=PALETTE_BLACK;
+					line(offsetx+1+(x*3),1+(y*3),offsetx+1+(x*3),1+(y*3));
+					if(x>0 && (GetConnections(x-1,y) & RoadMask)==RoadMask)
+					{
+						line(offsetx+(x*3),1+(y*3),offsetx+(x*3),1+(y*3));
+					}
+					if(x<MAP_WIDTH-1 && (GetConnections(x+1,y) & RoadMask)==RoadMask)
+					{
+						line(offsetx+2+(x*3),1+(y*3),offsetx+2+(x*3),1+(y*3));
+					}
+					if(y>0 && (GetConnections(x,y-1) & RoadMask)==RoadMask)
+					{
+						line(offsetx+1+(x*3),(y*3),offsetx+1+(x*3),(y*3));
+					}
+					if(y<MAP_HEIGHT-1 && (GetConnections(x,y+1) & RoadMask)==RoadMask)
+					{
+						line(offsetx+1+(x*3),2+(y*3),offsetx+1+(x*3),2+(y*3));
+					}
+				}
+			}
+
+			if(showpower==true)
+			{
+				uint8_t connections=GetConnections(x,y);
+				if((connections & PowerlineMask) == PowerlineMask)
+				{
+					*DRAW_COLORS=PALETTE_WHITE;
+					line(offsetx+1+(x*3),1+(y*3),offsetx+1+(x*3),1+(y*3));
+					if(x>0 && (GetConnections(x-1,y) & PowerlineMask)==PowerlineMask)
+					{
+						line(offsetx+(x*3),1+(y*3),offsetx+(x*3),1+(y*3));
+					}
+					if(x<MAP_WIDTH-1 && (GetConnections(x+1,y) & PowerlineMask)==PowerlineMask)
+					{
+						line(offsetx+2+(x*3),1+(y*3),offsetx+2+(x*3),1+(y*3));
+					}
+					if(y>0 && (GetConnections(x,y-1) & PowerlineMask)==PowerlineMask)
+					{
+						line(offsetx+1+(x*3),(y*3),offsetx+1+(x*3),(y*3));
+					}
+					if(y<MAP_HEIGHT-1 && (GetConnections(x,y+1) & PowerlineMask)==PowerlineMask)
+					{
+						line(offsetx+1+(x*3),2+(y*3),offsetx+1+(x*3),2+(y*3));
+					}
+				}
+			}
+
+		}
+	}
+
+	if(showbuildings==true)
+	{
+		for(int i=0; i<MAX_BUILDINGS; i++)
+		{
+			if(State.buildings[i].type!=BuildingType_None)
+			{
+				const BuildingInfo *bi=GetBuildingInfo(State.buildings[i].type);
+				*DRAW_COLORS=(PALETTE_WHITE << 4) | PALETTE_WHITE;
+				rect(offsetx+(State.buildings[i].x*3),(State.buildings[i].y*3),3*bi->width,3*bi->height);
+				if(showpower==true && State.buildings[i].type != Park && !IsRubble(State.buildings[i].type))
+				{
+					if(State.buildings[i].type==Powerplant || (State.buildings[i].hasPower==false && (AnimationFrame & 8)))
+					{
+						DrawTile(POWERCUT_TILE,offsetx+(State.buildings[i].x*3),(State.buildings[i].y*3),PALETTE_BLACK,PALETTE_WHITE,false);
+					}
+				}
+				if(showfdrange==true)
+				{
+					uint8_t closestdistance = 0xff;
+					for(int j=0; j<MAX_BUILDINGS; j++)
+					{
+						if(i!=j && State.buildings[j].type==FireDept && State.buildings[j].hasPower==true)
+						{
+							uint8_t dist=GetManhattanDistance(&State.buildings[i],&State.buildings[j]);
+							if(dist<closestdistance)
+							{
+								closestdistance=dist;
+							}
+						}
+					}
+					
+					//calc from Simulation.cpp - SimulateBuilding
+					int fireDeptInfluence = SIM_FIRE_DEPT_BASE_INFLUENCE + closestdistance * SIM_FIRE_DEPT_INFLUENCE_MULTIPLIER;
+
+					if(fireDeptInfluence <= 255 || (State.buildings[i].type==FireDept && State.buildings[i].hasPower==true))
+					{
+						// draw fire extingisher icon - if building is a fire dept, then flash icon
+						if(State.buildings[i].type!=FireDept || (AnimationFrame & 8))
+						{
+							DrawTile(247,offsetx+(State.buildings[i].x*3),(State.buildings[i].y*3),PALETTE_BLACK,PALETTE_WHITE,false);
+						}
+					}
+
+				}
+				// if on fire - show flasing fire icon
+				//if(State.buildings[i].onFire)
+				if(State.buildings[i].onFire && (AnimationFrame & 8))
+				{
+					DrawTile(FIRST_FIRE_TILE,offsetx+(State.buildings[i].x*3),(State.buildings[i].y*3),PALETTE_BLACK,PALETTE_WHITE,false);
+					//const uint8_t tile = FIRST_FIRE_TILE + ((tile - FIRST_FIRE_TILE + (AnimationFrame >> 3)) & 3)
+					//GetTileData(tile);
+					//DrawTileAt()
+				}
+			}
+		}
+	}
+
+	DrawString("Buildings",9,SCREEN_SIZE-15);
+	DrawString("Roads",9,SCREEN_SIZE-7);
+	DrawString("Electric",SCREEN_SIZE/2,SCREEN_SIZE-15);
+	DrawString("FD Range",SCREEN_SIZE/2,SCREEN_SIZE-7);
+
+	if(showbuildings==true)
+	{
+		DrawString("*",2,SCREEN_SIZE-14);
+	}
+	if(showroads==true)
+	{
+		DrawString("*",2,SCREEN_SIZE-6);
+	}
+	if(showpower==true)
+	{
+		DrawString("*",SCREEN_SIZE/2-8,SCREEN_SIZE-14);
+	}
+	if(showfdrange==true)
+	{
+		DrawString("*",SCREEN_SIZE/2-8,SCREEN_SIZE-6);
+	}
+
+	int32_t xpos=0;
+	int32_t ypos=SCREEN_SIZE-16;
+	switch(UIState.selection)
+	{
+	case 0:
+		break;
+	case 1:
+		ypos=SCREEN_SIZE-8;
+		break;
+	case 2:
+		xpos=SCREEN_SIZE/2-10;
+		break;
+	case 3:
+		xpos=SCREEN_SIZE/2-10;
+		ypos=SCREEN_SIZE-8;
+	}
+	DrawCursorRect(xpos, ypos, 8, 8);
+}
+
 void Draw()
 {
 	switch (UIState.state)
@@ -925,6 +1149,9 @@ void Draw()
 		break;
 	case DemographicsMenu:
 		DrawDemographicsMenu();
+		break;
+	case MapMenu:
+		DrawMapMenu();
 		break;
 	}
 
