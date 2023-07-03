@@ -2,6 +2,7 @@
 #include "Draw.h"
 #include "Interface.h"
 #include "Simulation.h"
+#include "global.h"
 
 GameState State;
 
@@ -54,6 +55,15 @@ void FocusTile(uint8_t x, uint8_t y)
 
 void TickGame()
 {
+	if (UIState.state == StartScreen)
+	{
+		// adjust displayed map coords every 8 seconds
+		if(global::ticks%480==0)
+		{
+			UIState.selectX=(GetRand()%(MAP_WIDTH-20))+10;
+			UIState.selectY=(GetRand()%(MAP_HEIGHT-20))+10;
+		}
+	}
 	if (UIState.state == InGame || UIState.state == ShowingToolbar)
 	{
 		Simulate();
@@ -72,4 +82,3 @@ void TickGame()
 
 	Draw();
 }
-

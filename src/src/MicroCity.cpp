@@ -8,6 +8,11 @@
 #include "wasmmemcpy.h"
 #include "global.h"
 
+#include "democity.h"
+
+//debug
+//#include "printf.h"
+
 uint8_t GetInput()
 {
   uint8_t result = 0;
@@ -61,8 +66,32 @@ void SaveCity()
     buffer[0]='C';
     buffer[1]='T';
     buffer[2]='Y';
-    buffer[3]='1';
+    buffer[3]='2';
     memcpy((void *)&buffer[4],(void *)&State,sizeof(GameState));
+
+    // debug - output bytes of game state
+    /*
+    {
+      trace("game data ={");
+      char cbuff[64];
+      int pos=0;
+      for(;pos+8<len;pos+=8)
+      {
+        int r=snprintf(cbuff,63,"0x%.2hhx,0x%.2hhx,0x%.2hhx,0x%.2hhx,0x%.2hhx,0x%.2hhx,0x%.2hhx,0x%.2hhx,",buffer[pos],buffer[pos+1],buffer[pos+2],buffer[pos+3],buffer[pos+4],buffer[pos+5],buffer[pos+6],buffer[pos+7]);
+        buffer[r]='\0';
+        trace(cbuff);
+      }
+      while(pos<len)
+      {
+        int r=snprintf(cbuff,63,"0x%.2hhx,",buffer[pos]);
+        buffer[r]='\0';
+        trace(cbuff);
+        pos++;
+      }
+      trace("};");
+    }
+    */
+
     diskw(buffer,len);
     delete [] buffer;
   }
@@ -89,7 +118,7 @@ bool LoadCity()
     {
       loaded=false;
     }
-    if(buffer[3]!='1')
+    if(buffer[3]!='2')
     {
       loaded=false;
     }
@@ -123,6 +152,9 @@ void start()
   PALETTE[2]=0x35A54D;      // green
   PALETTE[3]=0x5183C1;      // blue
   InitGame();
+
+  //load demo city for title screen
+  memcpy((void *)&State,(void *)&democity[0],sizeof(GameState));
 }
 
 void update()

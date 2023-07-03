@@ -70,11 +70,30 @@ uint8_t GetNumRoadConnections(Building* building)
 	return count;
 }
 
-void DoBudget()
+double MonthlyTaxes()
 {
-	// Collect taxes
-	int32_t totalPopulation = (State.residentialPopulation + State.commercialPopulation + State.residentialPopulation) * POPULATION_MULTIPLIER;
-	State.taxesCollected = (totalPopulation * State.taxRate) / 100;
+	const int32_t totalPopulation = static_cast<int32_t>(State.residentialPopulation + State.commercialPopulation + State.residentialPopulation) * POPULATION_MULTIPLIER;
+	return static_cast<double>(totalPopulation * State.taxRate) / 1200.0;
+}
+
+int32_t GetEstimatedYearTaxes()
+{
+	return State.accumulatedMonthlyTaxes + (State.month <= 11 ? (static_cast<double>(12-State.month) * MonthlyTaxes()) : 0);
+}
+
+void DoMonthEndBudget()
+{
+	// Accumulate monthly taxes
+	State.accumulatedMonthlyTaxes += (MonthlyTaxes() + 0.5);		// round any decimal to nearest integer
+}
+
+void DoYearEndBudget()
+{
+	// Collect taxes (taxes now accumulated monthly and then lump sum added at end of year)
+	//int32_t totalPopulation = (State.residentialPopulation + State.commercialPopulation + State.residentialPopulation) * POPULATION_MULTIPLIER;
+	//State.taxesCollected = (totalPopulation * State.taxRate) / 100;
+	State.taxesCollected = State.accumulatedMonthlyTaxes;
+	State.accumulatedMonthlyTaxes = 0;
 
 	State.money += State.taxesCollected;
 
@@ -479,6 +498,8 @@ void Simulate()
 		case SimulateNextMonth:
 			if(State.simulationStep==SimulateNextMonth || ((State.flags & FLAG_FAST) == FLAG_FAST && State.simulationStep==SimulateFastNextMonth))
 			{
+				DoMonthEndBudget();
+
 				State.simulationStep = 0;
 				State.month++;
 				if (State.month >= 12)
@@ -486,7 +507,7 @@ void Simulate()
 					State.month = 0;
 					State.year++;
 
-					DoBudget();
+					DoYearEndBudget();
 				}
 				return;
 			}

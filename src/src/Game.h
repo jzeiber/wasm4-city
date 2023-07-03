@@ -39,7 +39,8 @@ typedef struct
 	uint16_t industrialPopulation;
 	uint16_t commercialPopulation;
 
-	int32_t taxesCollected;
+	int32_t accumulatedMonthlyTaxes;		// taxes accumulated each month for current year
+	int32_t taxesCollected;					// taxes collected from previous year
 	uint8_t policeBudget;
 	uint8_t fireBudget;
 	uint16_t roadBudget;

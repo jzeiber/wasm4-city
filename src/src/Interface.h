@@ -59,5 +59,3 @@ void ProcessInput(void);
 void UpdateInterface(void);
 
 void GetBuildingBrushLocation(BuildingType buildingType, uint8_t* outX, uint8_t* outY);
-
-

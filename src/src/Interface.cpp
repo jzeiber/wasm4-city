@@ -14,10 +14,27 @@ void UpdateInterface()
 	int targetX = UIState.selectX * 8 + TILE_SIZE / 2 - DISPLAY_WIDTH / 2;
 	int targetY = UIState.selectY * 8 + TILE_SIZE / 2 - DISPLAY_HEIGHT / 2;
 
-	int diffX = targetX - UIState.scrollX;
-	UIState.scrollX = targetX - (diffX / 2);
-	int diffY = targetY - UIState.scrollY;
-	UIState.scrollY = targetY - (diffY / 2);
+	if(UIState.state == StartScreen)
+	{
+		if(global::ticks%2==0)
+		{
+			if(UIState.scrollX != targetX)
+			{
+				UIState.scrollX += (targetX < UIState.scrollX ? -1 : 1);
+			}
+			if(UIState.scrollY != targetY)
+			{
+				UIState.scrollY += (targetY < UIState.scrollY ? -1 : 1);
+			}
+		}
+	}
+	else
+	{
+		int diffX = targetX - UIState.scrollX;
+		UIState.scrollX = targetX - (diffX / 2);
+		int diffY = targetY - UIState.scrollY;
+		UIState.scrollY = targetY - (diffY / 2);
+	}
 
 	/*if(UIState.scrollX < targetX)
 	UIState.scrollX ++;

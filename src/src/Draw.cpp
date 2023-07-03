@@ -3,9 +3,12 @@
 #include "Interface.h"
 #include "Font.h"
 #include "Strings.h"
+#include "Simulation.h"
+#include "Defines.h"
 
 #include "wasmstring.h"
 #include "palette.h"
+#include "global.h"
 
 const uint8_t TileImageData[] =
 {
@@ -747,7 +750,10 @@ void DrawInGame()
 		DrawCursor();
 	}
 
-	DrawUI();
+	if (UIState.state != StartScreen)
+	{
+		DrawUI();
+	}
 }
 
 const char SaveCityStr[] = "Save City";
@@ -756,7 +762,7 @@ const char NewCityStr[] = "New City";
 const char AutoBudgetStr[] = "Auto Budget:";
 const char OnStr[] = "On";
 const char OffStr[] = "Off";
-const char VersionStr[] = "v0.2";
+const char VersionStr[] = "v0.3";
 
 void DrawSaveLoadMenu()
 {
@@ -791,7 +797,8 @@ void DrawStartScreen()
 	const int32_t logoY = (DISPLAY_HEIGHT / 2) - 31;
 	const int spacing = 9;
 
-	DrawFilledRect(0, 0, DISPLAY_WIDTH, DISPLAY_HEIGHT, PALETTE_WHITE);
+	//DrawFilledRect(0, 0, DISPLAY_WIDTH, DISPLAY_HEIGHT, PALETTE_WHITE);
+	DrawFilledRect((DISPLAY_WIDTH / 2 - (logoWidth /2 )) - 1, logoY -1 , logoWidth + 2, logoHeight + spacing * 2 + 2, PALETTE_WHITE);
 	DrawFilledRect(DISPLAY_WIDTH / 2 - logoWidth / 2, logoY, logoWidth, logoHeight, PALETTE_BLACK);
 	DrawBitmap(LogoBitmap, DISPLAY_WIDTH / 2 - logoWidth / 2, logoY, logoWidth, logoHeight, PALETTE_BLACK, PALETTE_WHITE);
 
@@ -827,6 +834,7 @@ void DrawNewCityMenu()
 
 const char BudgetHeaderStr[] =		"Budget report for";
 const char TaxRateStr[] =			"Tax rate         <   % >";
+const char EstYearTaxes[] =			"Est. year taxes";
 const char TaxesCollectedStr[] =	"Taxes collected";
 const char PoliceBudgetStr[] =		"Police budget";
 const char FireBudgetStr[] =		"Fire budget";
@@ -836,7 +844,7 @@ const char CashFlowStr[] =			"Cash flow";
 void DrawBudgetMenu()
 {
 	const int menuWidth = 100;
-	const int menuHeight = 56;
+	const int menuHeight = 63;
 	const int spacing = FONT_HEIGHT + 1;
 	DrawRect(DISPLAY_WIDTH / 2 - menuWidth / 2 + 1, DISPLAY_HEIGHT / 2 - menuHeight / 2 + 1, menuWidth, menuHeight, PALETTE_BLACK);
 	DrawFilledRect(DISPLAY_WIDTH / 2 - menuWidth / 2, DISPLAY_HEIGHT / 2 - menuHeight / 2, menuWidth, menuHeight, PALETTE_WHITE);
@@ -853,6 +861,10 @@ void DrawBudgetMenu()
 
 	DrawString(TaxRateStr, x, y);
 	DrawInt(State.taxRate, x + FONT_WIDTH * 19, y);
+	y += spacing;
+
+	DrawString(EstYearTaxes, x, y);
+	DrawCurrency(GetEstimatedYearTaxes(), x2, y);
 	y += spacing;
 
 	DrawString(TaxesCollectedStr, x, y);
@@ -898,6 +910,9 @@ void DrawDemographicsMenu()
 	y += spacing + 2;
 
 	DrawString("Population", x, y);
+	y += spacing;
+
+	DrawString("Residential", x, y);
 	DrawRightJustifiedInt(State.residentialPopulation, x2, y);
 	y += spacing;
 
@@ -907,6 +922,11 @@ void DrawDemographicsMenu()
 
 	DrawString("Industrial", x, y);
 	DrawRightJustifiedInt(State.industrialPopulation, x2, y);
+	y += spacing;
+
+	y += 2;
+	DrawString("Total", x, y);
+	DrawRightJustifiedInt(State.residentialPopulation + State.commercialPopulation + State.industrialPopulation, x2, y);
 	y += spacing;
 
 }
@@ -1131,6 +1151,7 @@ void Draw()
 	switch (UIState.state)
 	{
 	case StartScreen:
+		DrawInGame();
 		DrawStartScreen();
 		break;
 	case NewCityMenu:
