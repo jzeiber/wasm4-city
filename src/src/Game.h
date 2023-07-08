@@ -24,6 +24,7 @@ typedef struct
 	uint16_t year;	// Starts at 1900
 	uint8_t month;
 	uint8_t flags;				// pause flag
+	uint8_t data[4];			// 4 bytes since struct gets padded - TODO - index 0 - 6 high bits = scenario #, 2 low bits - 2nd bit won scenario, 1st bit lost scenario - index 1-3 not currently used
 	uint32_t simulationStep;
 	uint32_t seed;
 

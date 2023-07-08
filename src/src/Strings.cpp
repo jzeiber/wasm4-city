@@ -11,11 +11,11 @@ const char ParkStr[] = "Park";
 const char PoliceDeptStr[] = "Police Dept";
 const char FireDeptStr[] = "Fire Dept";
 const char StadiumStr[] = "Stadium";
-const char SaveLoadStr[] = "Save/Load";
+const char SaveLoadStr[] = "Save/Load/Options";
 const char BudgetStr[] = "Budget";
-const char DemographicsStr[] = "Demographics";
+const char DemographicsStr[] = "Demographics/Scenario";
 const char MapStr[] = "Map";
-const char PauseStr[] = "Pause/Go";
+const char PauseStr[] = "Pause/Go (Up/Down Change Speed)";
 
 const char* const ToolbarStrings[] =
 {

@@ -431,6 +431,26 @@ void PowerFloodFill(uint8_t x, uint8_t y)
 	stackPtr--; px = *stackPtr; \
 	stackSize--;
 
+void PowerFloodFillNew(uint8_t x, uint8_t y)
+{
+	uint8_t *grid = (uint8_t *)GetPowerGrid();
+	uint8_t *stackPtr = grid + (MAP_WIDTH * MAP_HEIGHT / 8);
+	uint8_t stackSize = 0;
+
+	STACK_PUSH(x, y);
+
+	while(stackSize)
+	{
+		STACK_POP(x, y);
+		SetTilePowered(x, y);
+		if(x>0 && (GetConnections(x-1,y) & PowerlineMask) && !IsTilePowered(x-1,y))
+		{
+			SetTilePowered(x-1,y);
+			STACK_PUSH(x-1,y);
+		}
+	}
+}
+
 void PowerFloodFill(uint8_t x, uint8_t y)
 {
 	uint8_t* grid = (uint8_t*)GetPowerGrid();

@@ -43,6 +43,8 @@ typedef struct
 	uint8_t drawTile;
 } BuildingInfo;
 
+extern const BuildingInfo BuildingMetaData[];
+
 bool PlaceBuilding(uint8_t buildingType, uint8_t x, uint8_t y);
 bool CanPlaceBuilding(uint8_t buildingType, uint8_t x, uint8_t y);
 const BuildingInfo* GetBuildingInfo(uint8_t buildingType);

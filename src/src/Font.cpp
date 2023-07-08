@@ -6,6 +6,7 @@
 #include "Font.h"
 #include "Draw.h"
 #include "palette.h"
+#include "wasmstring.h"
 
 // Font Definition
 const uint8_t font4x6[96][2] = {
@@ -246,6 +247,40 @@ void DrawString(const char* str, int32_t x, int32_t y)
 		DrawChar(c);
 		PrintX += FONT_WIDTH;
 	}
+}
+
+int32_t DrawStringWrapped(const char *str, int32_t x, int32_t y, int32_t lineheight)
+{
+	int32_t lines=1;
+	PrintX = x;
+	PrintY = y;
+
+	for(;;)
+	{
+		char c = *str++;
+		if(!c)
+			break;
+
+		if(c=='\n')
+		{
+			PrintY+=lineheight;
+			PrintX=x;
+			lines++;
+		}
+		else
+		{
+			DrawChar(c);
+			PrintX += FONT_WIDTH;
+		}
+	}
+	
+	return lines;
+}
+
+void DrawStringCentered(const char *str, int32_t cx, int32_t y)
+{
+	size_t len=strlen(str);
+	DrawString(str,cx-((len*FONT_WIDTH)/2),y);
 }
 
 #define MAX_DIGITS 5

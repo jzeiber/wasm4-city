@@ -5,6 +5,7 @@
 #define TILE_SIZE 8
 #define TILE_SIZE_SHIFT 3
 
+// map width and height can never be greater than 64 since we use only 6 bits each for x and y positions
 #ifdef _WIN32
 //#define DISPLAY_WIDTH 192
 //#define DISPLAY_HEIGHT 192
@@ -28,7 +29,7 @@
 #define VISIBLE_TILES_X ((DISPLAY_WIDTH / TILE_SIZE) + 1)
 #define VISIBLE_TILES_Y ((DISPLAY_HEIGHT / TILE_SIZE) + 1)
 
-#define MAX_BUILDINGS 130
+#define MAX_BUILDINGS 150
 
 // How long a button has to be held before the first event repeats
 #define INPUT_REPEAT_TIME 10

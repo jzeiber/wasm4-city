@@ -6,6 +6,9 @@
 #include "global.h"
 #include "perlinnoise.h"
 
+// for animated terrain tile - defined in Draw.cpp
+extern uint8_t AnimationFrame;
+
 const uint8_t Terrain1Data[] =
 {
 #include "Terrain1.inc.h"
@@ -28,6 +31,7 @@ const uint8_t Terrain5Data[] =
 };
 uint8_t Terrain6Data[288] = {0};
 
+/*
 const char Terrain1Str[] = "River";
 const char Terrain2Str[] = "Island";
 const char Terrain3Str[] = "Lake";
@@ -54,6 +58,7 @@ const char* GetTerrainDescription(uint8_t index)
 		return Terrain6Str;
 	}
 }
+*/
 
 const uint8_t* GetTerrainData(uint8_t index)
 {
@@ -82,6 +87,11 @@ bool IsTerrainClear(int x, int y)
 
 uint8_t GetTerrainTile(int x, int y)
 {
+	if(x<0 || x>=MAP_WIDTH || y<0 || y>=MAP_HEIGHT)
+	{
+		return 0;
+	}
+
 	bool northClear = y == 0 || IsTerrainClear(x, y - 1);
 	bool eastClear = x >= MAP_WIDTH - 1 || IsTerrainClear(x + 1, y);
 	bool southClear = y >= MAP_HEIGHT - 1 || IsTerrainClear(x, y + 1);
@@ -104,6 +114,21 @@ uint8_t GetTerrainTile(int x, int y)
 	{
 		return FIRST_WATER_TILE + ((((y * 359)) ^ ((x * 431))) & 3);
 	}
+}
+
+uint8_t GetAnimatedTerrainTile(int x, int y)
+{
+	uint8_t tile = GetTerrainTile(x,y);
+
+	// animation logic from GetCachedTile(int x, int y) in Draw.cpp
+
+	// Animate water tiles
+	if (tile >= FIRST_WATER_TILE && tile <= LAST_WATER_TILE)
+	{
+		tile = FIRST_WATER_TILE + ((tile - FIRST_WATER_TILE + (AnimationFrame >> 3)) & 3);
+	}
+
+	return tile;
 }
 
 void GenerateRandomTerrain(const uint8_t terrainType, const uint64_t seed)

@@ -2,6 +2,8 @@
 #include "Interface.h"
 #include "Draw.h"
 #include "global.h"
+#include "exportcityppm.h"
+#include "scenario.h"
 
 UIStateStruct UIState;
 
@@ -193,7 +195,10 @@ void HandleInput(uint8_t input)
 			switch (UIState.selection)
 			{
 			case 0:
+				InitGame();
 				UIState.state = NewCityMenu;
+				UIState.selection = 0;
+				State.terrainType = ScenarioData[UIState.selection].mapidx;
 				break;
 			case 1:
 				if (LoadCity())
@@ -213,11 +218,23 @@ void HandleInput(uint8_t input)
 	{
 		if (input & INPUT_LEFT)
 		{
-			if (State.terrainType == 0)
+			if(UIState.selection == 0)
 			{
-				State.terrainType = NUM_TERRAIN_TYPES - 1;
+				UIState.selection = SCENARIO_COUNT - 1;
 			}
-			else State.terrainType--;
+			else
+			{
+				UIState.selection--;
+			}
+			if(ScenarioData[UIState.selection].stateptr)
+			{
+				LoadStaticCity(ScenarioData[UIState.selection].stateptr);
+			}
+			else
+			{
+				InitGame();
+			}
+			State.terrainType = ScenarioData[UIState.selection].mapidx;
 			if(State.terrainType==NUM_TERRAIN_TYPES-1)
 			{
 				State.seed=global::ticks;
@@ -226,11 +243,23 @@ void HandleInput(uint8_t input)
 		}
 		if (input & INPUT_RIGHT)
 		{
-			if (State.terrainType == NUM_TERRAIN_TYPES - 1)
+			if(UIState.selection == SCENARIO_COUNT - 1)
 			{
-				State.terrainType = 0;
+				UIState.selection = 0;
 			}
-			else State.terrainType++;
+			else
+			{
+				UIState.selection++;
+			}
+			if(ScenarioData[UIState.selection].stateptr)
+			{
+				LoadStaticCity(ScenarioData[UIState.selection].stateptr);
+			}
+			else
+			{
+				InitGame();
+			}
+			State.terrainType=ScenarioData[UIState.selection].mapidx;
 			if(State.terrainType==NUM_TERRAIN_TYPES-1)
 			{
 				State.seed=global::ticks;
@@ -241,19 +270,39 @@ void HandleInput(uint8_t input)
 		{
 			uint8_t terrainType = State.terrainType;
 			uint32_t seed = State.seed;
+			const uint8_t scenario = UIState.selection;
 			InitGame();
+			if(ScenarioData[scenario].flags & SCENARIO_FLAG_SCENARIO)
+			{
+				LoadStaticCity(ScenarioData[scenario].stateptr);
+				State.data[0] = scenario << 2;
+				State.year=ScenarioData[scenario].startyear-1900;
+				State.month=0;
+				State.money=ScenarioData[scenario].startfunds;
+				State.taxesCollected=0;
+				State.taxRate=7;
+				State.accumulatedMonthlyTaxes=0;
+				State.flags&=~FLAG_FAST;
+				State.flags&=~FLAG_PAUSE;
+				State.flags&=~FLAG_MAP_SHOWBUILDINGS;
+				State.flags&=~FLAG_MAP_SHOWFDRANGE;
+				State.flags&=~FLAG_MAP_SHOWROADS;
+				State.flags&=~FLAG_MAP_SHOWELECTRIC;
+			}
 			State.terrainType = terrainType;
 			State.seed = seed;
 			ResetVisibleTileCache();
-			UIState.state = InGame;
+			UIState.state = ShowingToolbar;
+			UIState.selection = 0;
 		}
 	}
 	else if (UIState.state == SaveLoadMenu)
 	{
-		WrapMenuInput(input, 4);
+		WrapMenuInput(input, 5);
 		if (input & (INPUT_A))
 		{
-			UIState.state = InGame;
+			UIState.state = ShowingToolbar;
+			UIState.selection = SaveLoadToolbarButton;
 		}
 		if (input & INPUT_B)
 		{
@@ -275,10 +324,16 @@ void HandleInput(uint8_t input)
 				}
 				break;
 			case 2:
+				InitGame();
 				UIState.state = NewCityMenu;
+				UIState.selection = 0;
+				State.terrainType = ScenarioData[UIState.selection].mapidx;
 				break;
 			case 3:
 				UIState.autoBudget = !UIState.autoBudget;
+				break;
+			case 4:
+				ExportCityPPM();
 				break;
 			}
 		}
@@ -429,22 +484,87 @@ void HandleInput(uint8_t input)
 			}
 			if (input & (INPUT_A | INPUT_B))
 			{
-				UIState.state = InGame;
+				UIState.state = ShowingToolbar;
+				UIState.selection = BudgetToolbarButton;
+			}
+		}
+	}
+	else if (UIState.state == ScenarioWinScreen || UIState.state == ScenarioLoseScreen)
+	{
+		if(input & INPUT_UP)
+		{
+			if(UIState.selection==0)
+			{
+				UIState.selection=1;
+			}
+			else
+			{
+				UIState.selection--;
+			}
+		}
+		if(input & INPUT_DOWN)
+		{
+			if(UIState.selection==1)
+			{
+				UIState.selection=0;
+			}
+			else
+			{
+				UIState.selection++;
+			}
+		}
+		if (input & INPUT_B)
+		{
+			if(UIState.selection==0)
+			{
+				// TODO - reset scenario data in State
+				UIState.state=ShowingToolbar;
+				UIState.selection=0;
+			}
+			if(UIState.selection==1)
+			{
+				UIState.state=NewCityMenu;
+				UIState.selection=0;
+				State.terrainType = ScenarioData[UIState.selection].mapidx;
 			}
 		}
 	}
 	else if (UIState.state == DemographicsMenu)
 	{
+		if(input & INPUT_LEFT)
+		{
+			if(UIState.selection==0)
+			{
+				UIState.selection=1;
+			}
+			else
+			{
+				UIState.selection--;
+			}
+		}
+		if(input & INPUT_RIGHT)
+		{
+			if(UIState.selection==1)
+			{
+				UIState.selection=0;
+			}
+			else
+			{
+				UIState.selection++;
+			}
+		}
 		if(input & (INPUT_A | INPUT_B))
 		{
-			UIState.state = InGame;
+			UIState.state = ShowingToolbar;
+			UIState.selection = DemographicsToolbarButton;
 		}
 	}
 	else if (UIState.state == MapMenu)
 	{
 		if(input & (INPUT_A))
 		{
-			UIState.state = InGame;
+			UIState.state = ShowingToolbar;
+			UIState.selection = MapToolbarButton;
 		}
 		else if(input & (INPUT_B))
 		{

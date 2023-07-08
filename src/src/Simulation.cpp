@@ -3,6 +3,7 @@
 #include "Draw.h"
 #include "Interface.h"
 #include "Simulation.h"
+#include "scenario.h"
 
 enum SimulationSteps
 {
@@ -478,6 +479,65 @@ void CountPopulation()
 	}
 }
 
+void CheckScenarioWinLose()	// only called once after December of each year (but before year is incremented)
+{
+	uint8_t scenario=(State.data[0] >> 2);
+	if(scenario)
+	{
+		if(ScenarioData[scenario].goalyear>0 && (ScenarioData[scenario].goalyear-1900) == State.year)
+		{
+			bool won=true;
+			if(ScenarioData[scenario].goalfunds>State.money)
+			{
+				won=false;
+			}
+			if(ScenarioData[scenario].goalrespop>State.residentialPopulation)
+			{
+				won=false;
+			}
+			if(ScenarioData[scenario].goalcompop>State.commercialPopulation)
+			{
+				won=false;
+			}
+			if(ScenarioData[scenario].goalindpop>State.industrialPopulation)
+			{
+				won=false;
+			}
+
+			for(int i=0; i<SCENARIO_GOAL_BUILDING_COUNT; i++)
+			{
+				if(ScenarioData[scenario].goalbuilding[i]!=BuildingType_None && ScenarioData[scenario].goalbuildingcount[i]>0)
+				{
+					int count=0;
+					for(int i=0; i<MAX_BUILDINGS; i++)
+					{
+						if(State.buildings[i].type==ScenarioData[scenario].goalbuilding[i])
+						{
+							count++;
+						}
+					}
+					if(ScenarioData[scenario].goalbuildingcount[i]>count)
+					{
+						won=false;
+					}
+				}
+			}
+		
+			UIState.selection=0;
+			if(won==true)
+			{
+				State.data[0]|=1<<1;
+				UIState.state=ScenarioWinScreen;
+			}
+			else
+			{
+				State.data[0]|=1;
+				UIState.state=ScenarioLoseScreen;
+			}
+		}
+	}
+}
+
 void Simulate()
 {
 	if((State.flags & FLAG_PAUSE) != FLAG_PAUSE)
@@ -504,10 +564,12 @@ void Simulate()
 				State.month++;
 				if (State.month >= 12)
 				{
+					DoYearEndBudget();
+
+					CheckScenarioWinLose();		// do this after budget so budget screen won't pop up
+
 					State.month = 0;
 					State.year++;
-
-					DoYearEndBudget();
 				}
 				return;
 			}

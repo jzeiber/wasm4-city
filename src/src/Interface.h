@@ -38,7 +38,9 @@ enum
 	SaveLoadMenu,
 	BudgetMenu,
 	DemographicsMenu,
-	MapMenu
+	MapMenu,
+	ScenarioWinScreen,
+	ScenarioLoseScreen
 };
 
 typedef struct
@@ -59,3 +61,5 @@ void ProcessInput(void);
 void UpdateInterface(void);
 
 void GetBuildingBrushLocation(BuildingType buildingType, uint8_t* outX, uint8_t* outY);
+
+bool LoadStaticCity(const uint8_t *citydata);		// MicroCity.cpp
