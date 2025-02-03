@@ -852,7 +852,7 @@ const char AutoBudgetStr[] = "Auto Budget:";
 const char OnStr[] = "On";
 const char OffStr[] = "Off";
 const char ExportCityPPMStr[] = "Export City PPM";
-const char VersionStr[] = "v0.4";
+const char VersionStr[] = "v0.4.1";
 
 void DrawSaveLoadMenu()
 {

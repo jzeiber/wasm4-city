@@ -73,7 +73,7 @@ uint8_t GetNumRoadConnections(Building* building)
 
 double MonthlyTaxes()
 {
-	const int32_t totalPopulation = static_cast<int32_t>(State.residentialPopulation + State.commercialPopulation + State.residentialPopulation) * POPULATION_MULTIPLIER;
+	const int32_t totalPopulation = static_cast<int32_t>(State.residentialPopulation + State.commercialPopulation + State.industrialPopulation) * POPULATION_MULTIPLIER;
 	return static_cast<double>(totalPopulation * State.taxRate) / 1200.0;
 }
 
